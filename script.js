@@ -69,6 +69,14 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 
+// Update some features
+const modal = document.querySelector('.modal');
+const closeModalBtn = document.querySelector('.modal__btn');
+const overlay = document.querySelector('.overlay');
+const removeAllBtn = document.querySelector('.remove-all');
+
+/////////////////////////////////////////////
+// Application
 class App {
   #map;
   #mapZoomLevel = 13;
@@ -80,17 +88,20 @@ class App {
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
-  
+    
+    //Update some features
+    closeModalBtn.addEventListener('click', this._hideModal);
+    overlay.addEventListener('click', this._hideModal);
+    if (this.#workouts.length > 0) {
+      removeAllBtn.classList.remove('hidden');
+    }
+    this._removeAll();
   }
 
   _getPosition() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        this._loadMap.bind(this),
-        function () {
-          alert('Can not get position!');
-        }
-      );
+        this._loadMap.bind(this), this._showForm);
     }
   }
 
@@ -164,7 +175,7 @@ class App {
         !validInputs(distance, duration, cadence) ||
         !allPositive(distance, duration, cadence)
       ) {
-        return alert('Inputs have to be positive numbers!');
+        return this._showModal();
       }
       workout = new Running([lat, lng], distance, duration, cadence);
     }
@@ -197,6 +208,11 @@ class App {
 
     // Set local storage to all workouts
     this._setLocalStorage();
+
+    // Update some new features
+    //Show all workout
+    this._showRemoveAllBtn();
+
   }
 
   _renderWorkoutMarker(workout) {
@@ -295,6 +311,33 @@ class App {
   reset() {
     localStorage.removeItem('workouts');
     location.reload();
+  }
+
+  // Update some features
+  // Modal
+  _showModal() {
+    modal.classList.add('active');
+    overlay.classList.remove('hidden');
+  }
+
+  _hideModal() {
+    modal.classList.remove('active');
+    overlay.classList.add('hidden');
+  }
+
+  // Delete all activities
+  _showRemoveAllBtn() {
+    // Show remove btn
+    if (this.#workouts.length > 0) {
+      removeAllBtn.classList.remove('hidden');
+    }
+  }
+
+  _removeAll() {
+    removeAllBtn.addEventListener('click', function() {
+      localStorage.removeItem('workouts');
+      location.reload();
+    })
   }
 }
 

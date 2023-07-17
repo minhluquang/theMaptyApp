@@ -176,6 +176,7 @@ class App {
         !allPositive(distance, duration, cadence)
       ) {
         return this._showModal();
+        // return alert('Inputs have to be positive numbers!');
       }
       workout = new Running([lat, lng], distance, duration, cadence);
     }
@@ -189,7 +190,8 @@ class App {
         !validInputs(distance, duration, elevation) ||
         !allPositive(distance, duration, elevation)
       ) {
-        return alert('Inputs have to be positive numbers!');
+        return this._showModal();
+        // return alert('Inputs have to be positive numbers!');
       }
       workout = new Cycling([lat, lng], distance, duration, elevation);
     }

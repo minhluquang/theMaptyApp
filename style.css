@@ -68,6 +68,7 @@ a:visited {
 }
 
 .workout {
+  position: relative;
   background-color: var(--color-dark--2);
   border-radius: 5px;
   padding: 1.5rem 2.25rem;
@@ -114,16 +115,31 @@ a:visited {
   font-weight: 800;
 }
 
+.workout__btn {
+  position: absolute;
+  background-color: transparent;
+  top: 6px;
+  right: 6px;
+  border: none;
+  font-size: 16px;
+  transition: 1s;
+  opacity: 0.4;
+}
+
+.workout__btn:hover {
+  opacity: 1;
+  cursor: pointer;
+  transform: rotate(180deg);
+}
+
 .form {
   background-color: var(--color-dark--2);
   border-radius: 5px;
   padding: 1.5rem 2.75rem;
   margin-bottom: 1.75rem;
-
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.5rem 2.5rem;
-
   /* Match height and activity boxes */
   height: 9.25rem;
   transition: all 0.5s, transform 1ms;
@@ -290,6 +306,9 @@ a:visited {
 .hidden {
   display: none;
   opacity: 0;
+  transform: translate(-50%, -50%) (0.5);
+  transition: opacity 300ms ease-in-out
+              transform 1s cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 
 /* Remove all items */
@@ -314,4 +333,115 @@ a:visited {
   background-color: transparent;
   color: rgb(255, 72, 72);
   transition: all 500ms ease-in-out;
+}
+
+/* Sort */
+.sidebar__sort{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+  font-size: 15px;
+  font-weight: bold;
+  transform: scale(1);
+  transition: all 300ms ease-in-out;
+}
+
+.siderbar__sort--label{
+  margin-right: 10px;
+}
+
+.sidebar__sort--type{
+  padding: 0.2rem 0.4rem;
+  font-family: inherit;
+  font-size: 1.4rem;
+  border: none;
+  border-radius: 3px;
+  background-color: var(--color-light--3);
+  transition: all 0.2s;
+  outline: none;
+}
+
+/* Toast */
+.toast--container {
+  position: fixed;
+  top: 3rem;
+  right: 3rem;
+  min-height: 40px;
+  z-index: 1000;
+}
+
+.toast{
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  background-color: #000;
+  border-radius: 5px;
+  font-size: 16px;
+  padding: 10px;
+  max-width: 300px;
+  overflow: hidden;
+  box-shadow: 1px 1px rgba(0,0,0,0.1);
+  margin-bottom: 10px;
+}
+
+.toast--success {
+  background-color: rgba(219, 252, 240, 0.9);
+  border-left: 5px solid rgb(57,211,158);
+}
+
+.toast--success .toast__icon {
+  color: rgb(57,211,158);
+}
+
+.toast--error {
+  background-color: rgba(253,237,239, 0.9);
+  border-left: 5px solid rgb(239,77,97);
+}
+
+.toast--error .toast__icon {
+  color: rgb(239,77,97);
+}
+
+.toast__icon{
+  margin: 0 10px 0 5px;
+}
+
+.toast__message{
+  margin-right: 5px;
+  color: #4e4e4e;
+  font-weight: bold;
+  line-height: 2rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; /* Số dòng tối đa muốn hiển thị */
+  overflow: hidden;
+}
+
+
+@keyframes fadeIn {
+  0% {
+    transform: translate(120%);
+  } 
+
+  35% {
+    transform: translate(-15%);
+  }
+
+  75% {
+    transform: translate(10%);
+  }
+  
+  100% {
+    transform: translate(0%); 
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }

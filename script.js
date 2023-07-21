@@ -17,8 +17,10 @@ class Workout {
   _setDescription() {
     // prettier-ignore
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    
-    this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${months[new Date().getMonth()]} ${new Date().getDate()}`;
+
+    this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${
+      months[new Date().getMonth()]
+    } ${new Date().getDate()}`;
   }
 
   click() {
@@ -74,7 +76,8 @@ const modal = document.querySelector('.modal');
 const closeModalBtn = document.querySelector('.modal__btn');
 const overlay = document.querySelector('.overlay');
 const removeAllBtn = document.querySelector('.remove-all');
-
+const sort = document.querySelector('.sidebar__sort');
+const sortInput = document.querySelector('.sidebar__sort--type');
 /////////////////////////////////////////////
 // Application
 class App {
@@ -82,13 +85,15 @@ class App {
   #mapZoomLevel = 13;
   #mapEvent;
   #workouts = [];
+  #markerGroup;
+  #group = [];
   constructor() {
     this._getPosition();
     this._getLocalStorage();
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
-    
+
     //Update some features
     closeModalBtn.addEventListener('click', this._hideModal);
     overlay.addEventListener('click', this._hideModal);
@@ -96,12 +101,16 @@ class App {
       removeAllBtn.classList.remove('hidden');
     }
     this._removeAll();
+    this._sort();
+    this._deleteWorkout();
   }
 
   _getPosition() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        this._loadMap.bind(this), this._showForm);
+        this._loadMap.bind(this),
+        this._showForm
+      );
     }
   }
 
@@ -126,7 +135,7 @@ class App {
     // Show marker when get data on local storage
     this.#workouts.forEach(workout => {
       this._renderWorkoutMarker(workout);
-    })
+    });
   }
 
   _showForm(mapE) {
@@ -215,11 +224,17 @@ class App {
     //Show all workout
     this._showRemoveAllBtn();
 
+    //Sort
+    // this._sort();
+
+    // Show toast when created success new workout
+    this._toast(`You have successfully created a ${type} workout.`, 'success');
   }
 
   _renderWorkoutMarker(workout) {
+    this.#markerGroup = L.layerGroup().addTo(this.#map);
     L.marker(workout.coords)
-      .addTo(this.#map)
+      .addTo(this.#markerGroup)
       .bindPopup(
         L.popup({
           maxWidth: 250,
@@ -232,7 +247,7 @@ class App {
       .setPopupContent(`${workout.description}`)
       .openPopup();
   }
-  
+
   _renderWorkout(workout) {
     let html = `
       <li class="workout workout--${workout.type}" data-id="${workout.id}">
@@ -249,7 +264,8 @@ class App {
           <span class="workout__value">${workout.duration}</span>
           <span class="workout__unit">min</span>
         </div>
-      `
+        <button class="workout__btn">❌</button>
+      `;
     if (workout.type === 'running') {
       html += `
       <div class="workout__details">
@@ -262,7 +278,7 @@ class App {
         <span class="workout__value">${workout.cadence}</span>
         <span class="workout__unit">spm</span>
       </div>
-      `
+      `;
     }
 
     if (workout.type === 'cycling') {
@@ -277,21 +293,27 @@ class App {
         <span class="workout__value">${workout.elevationGain}</span>
         <span class="workout__unit">m</span>
       </div>
-      `
+      `;
     }
     form.insertAdjacentHTML('afterend', html);
+
+    // Update some features
+    this._deleteWorkout();
   }
 
   _moveToPopup(e) {
-    const workoutEl = e.target.closest('.workout')
+    const workoutEl = e.target.closest('.workout');
     if (!workoutEl) return;
-    const workout = this.#workouts.find(workout => workout.id === workoutEl.dataset.id);
+    if (this.#workouts.length === 0) return;
+    const workout = this.#workouts.find(
+      workout => workout.id === workoutEl.dataset.id
+    );
     this.#map.setView(workout.coords, this.#mapZoomLevel, {
       animate: true,
       pan: {
-        duration: 0.75
-      }
-    })
+        duration: 0.75,
+      },
+    });
 
     // using the public interface
     // workout.click();
@@ -303,11 +325,11 @@ class App {
 
   _getLocalStorage() {
     const data = JSON.parse(localStorage.getItem('workouts'));
-    if(!data) return;
+    if (!data) return;
     this.#workouts = data;
     this.#workouts.forEach(workout => {
       this._renderWorkout(workout);
-    })
+    });
   }
 
   reset() {
@@ -336,10 +358,123 @@ class App {
   }
 
   _removeAll() {
-    removeAllBtn.addEventListener('click', function() {
-      localStorage.removeItem('workouts');
+    const that = this;
+    removeAllBtn.addEventListener('click', function () {
+      that._toast('Successfully deleted all data.', 'success');
+      removeAllBtn.classList.add('hidden');
+      setTimeout(() => {
+        localStorage.removeItem('workouts');
+        location.reload();
+      }, 2000);
+    });
+  }
+
+  // Sort
+  _deleteOriginalEl() {
+    const liElements = containerWorkouts.querySelectorAll('li');
+    liElements.forEach(liElement => {
+      if (liElement.classList.contains('workout')) {
+        liElement.remove();
+      }
+    });
+  }
+
+  _sort() {
+    if (this.#workouts.length > 0) {
+      sort.classList.remove('hidden');
+    }
+    form.addEventListener('submit', function () {
+      sort.classList.remove('hidden');
+    });
+    let isEmpty;
+    const that = this;
+    const workouts = this.#workouts;
+    sortInput.addEventListener('change', function (e) {
+      if (e.target.value === 'running') {
+        let runWorkout = workouts.filter(workout => workout.type === 'running');
+        that._deleteOriginalEl();
+        runWorkout.forEach(workout => {
+          that._renderWorkout(workout);
+        });
+        isEmpty = runWorkout.length === 0 ? true : false;
+      } else if (e.target.value === 'cycling') {
+        const cycWorkout = workouts.filter(
+          workout => workout.type === 'cycling'
+        );
+        that._deleteOriginalEl();
+        cycWorkout.forEach(workout => {
+          that._renderWorkout(workout);
+        });
+        isEmpty = cycWorkout.length === 0 ? true : false;
+      } else if (e.target.value === 'all') {
+        that._deleteOriginalEl();
+        workouts.forEach(workout => {
+          that._renderWorkout(workout);
+        });
+        isEmpty = workouts.length === 0 ? true : false;
+      }
+
+      if (isEmpty) {
+        that._toast(
+          `Perhaps the ${e.target.value} does not exist, so it cannot be filtered`,
+          'error'
+        );
+      } else {
+        that._toast(
+          `You have successfully filtered by ${e.target.value}`,
+          'success'
+        );
+      }
+    });
+  }
+
+  // Toast
+  _toast(message, type) {
+    const icon = {
+      success: 'fa-sharp fa-solid fa-circle-check',
+      error: 'fa-solid fa-circle-exclamation',
+    };
+    const toastContainer = document.querySelector('.toast--container');
+    const toast = document.createElement('div');
+    toast.classList.add('toast', `toast--${type}`);
+    toast.style.animation = `fadeIn 1s ease-in-out, fadeOut linear 1s 3s forwards`;
+    toast.innerHTML = `
+        <div class="toast__icon">
+          <i class="${icon[type]}"></i>
+        </div>
+        <div class="toast__message">${message}</div>
+    `;
+    toastContainer.appendChild(toast);
+    setTimeout(() => {
+      toastContainer.removeChild(toast);
+    }, 4000);
+  }
+
+  // Delete workout element
+  _deleteWorkout() {
+    const that = this;
+    const deleteWorkoutBtn = document.querySelector('.workout__btn');
+    if (!deleteWorkoutBtn) return;
+    deleteWorkoutBtn.addEventListener('click', function (e) {
+      const workoutEl = e.target.closest('.workout');
+      if (!workoutEl)
+        that._toast(
+          'Failed to delete the running workout. Please try again later!',
+          'error'
+        );
+      that._toast(
+        `Successfully deleted the ${workoutEl.type} workout!`,
+        'success'
+      );
+      const findIndexElement = that.#workouts.findIndex(
+        workout => workout.id === workoutEl.dataset.id
+      );
+      that.#workouts.splice(findIndexElement, 1);
+      workoutEl.remove();
+      that._setLocalStorage();
+      // Remove marker
       location.reload();
-    })
+    });
   }
 }
 

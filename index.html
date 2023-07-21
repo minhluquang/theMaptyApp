@@ -6,6 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <link rel="shortcut icon" type="image/png" href="/icon.png" />
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <link
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap"
       rel="stylesheet"
@@ -33,7 +35,14 @@
   <body>
     <div class="sidebar">
       <img src="logo.png" alt="Logo" class="logo" />
-
+      <div class="sidebar__sort hidden">
+        <label class="siderbar__sort--label">Sort</label>
+        <select class="sidebar__sort--type">
+          <option value="all">All</option>
+          <option value="running">Running</option>
+          <option value="cycling">Cycling</option>
+        </select>
+      </div>
       <ul class="workouts">
         <form class="form hidden">
           <div class="form__row">
@@ -82,6 +91,7 @@
             <span class="workout__icon">⏱</span>
             <span class="workout__value">24</span>
             <span class="workout__unit">min</span>
+            <button class="workout__btn">❌</button>
           </div>
           <div class="workout__details">
             <span class="workout__icon">⚡️</span>
@@ -135,11 +145,30 @@
     <div id="map"></div>
 
     <!-- Update some features -->
+    <!-- Start: Modal -->
     <div class="modal">
       <button class="modal__btn">❌</button>
       <div class="modal__title">🚫 Your input data is invalid! 😫</div>
       <div class="modal__description">Inputs have to be positive numbers!</div>
     </div>
     <div class="overlay hidden"></div>
+    <!-- End: Modal -->
+
+    <!-- Start: Toast -->
+    <div class="toast--container">
+      <!-- <div class="toast toast--success">
+        <div class="toast__icon">
+          <i class="fa-sharp fa-solid fa-circle-check"></i>
+        </div>
+        <div class="toast__message">You have successfully arranged by ${e.target.value} 123123123123123123123</div>
+      </div>
+      <div class="toast toast--error">
+        <div class="toast__icon">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div class="toast__message">Success SuccessSuccessSuccess</div>
+      </div> 
+    </div> -->
+    <!-- End: Toast -->
   </body>
 </html>
